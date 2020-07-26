@@ -1,0 +1,53 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="webuploader/webuploader.css">
+    <script type="text/javascript" src="webuploader/webuploader.js"></script>
+</head>
+
+<body>
+<div id="uploader">
+    <div class="btns">
+        <div id="picker">选择文件</div>
+        <button id="startBtn" class="btn btn-default">开始上传</button>
+    </div>
+</div>
+</body>
+
+<script type="text/javascript">
+
+var GUID = WebUploader.Base.guid();//一个GUID
+
+var uploader = WebUploader.create({
+  // swf文件路径
+  swf: 'webuploader/Uploader.swf',
+  // 文件接收服务端。
+  server: 'http://localhost:8080/api/upload/part',
+  formData:{
+    guid : GUID
+  },
+  pick: '#picker',
+  chunked : true, // 分片处理
+  chunkSize : 1 * 1024 * 1024, // 每片1M,
+  chunkRetry : false,// 如果失败，则不重试
+  threads : 1,// 上传并发数。允许同时最大上传进程数。
+  resize: false
+});
+
+$("#startBtn").click(function () {
+  uploader.upload();
+});
+
+//当文件上传成功时触发。
+uploader.on( "uploadSuccess", function( file ) {
+  $.post('http://localhost:8080/api/upload/merge', { guid: GUID, fileName: file.name}, function (data) {
+    if(data.code == 200){
+     alert('上传成功!');
+    }
+   });
+});
+
+</script>
+
+</html>
